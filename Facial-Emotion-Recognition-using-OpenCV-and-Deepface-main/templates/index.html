@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Recognition System | AI Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f1419;
+            color: #e4e6eb;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(to right, #1a1f2e, #2d3748);
+            padding: 24px 40px;
+            border-bottom: 1px solid #2d3748;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.75em;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 0.9em;
+            color: #9ca3af;
+            font-weight: 400;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            background: #10b981;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 0;
+            height: calc(100vh - 100px);
+        }
+
+        .video-section {
+            background: #1a1f2e;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .video-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #3b4252;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #2d3748;
+            color: #e4e6eb;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn:hover {
+            background: #3b4252;
+            border-color: #4b5563;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid #2d3748;
+        }
+
+        #video-stream {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .sidebar {
+            background: #151a23;
+            border-left: 1px solid #2d3748;
+            overflow-y: auto;
+        }
+
+        .stats-card {
+            padding: 24px;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .stats-card h2 {
+            font-size: 1em;
+            color: #9ca3af;
+            margin-bottom: 16px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-item {
+            background: #1a1f2e;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #2d3748;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .emotion-list {
+            list-style: none;
+        }
+
+        .emotion-item {
+            background: #1a1f2e;
+            padding: 14px 16px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border: 1px solid #2d3748;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .emotion-item:hover {
+            border-color: #3b4252;
+            background: #1f2533;
+        }
+
+        .emotion-name {
+            font-weight: 500;
+            color: #e4e6eb;
+            text-transform: capitalize;
+            font-size: 0.95em;
+        }
+
+        .emotion-confidence {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .info-card {
+            padding: 24px;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .info-card h3 {
+            color: #9ca3af;
+            margin-bottom: 16px;
+            font-size: 1em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-card ul {
+            list-style: none;
+        }
+
+        .info-card li {
+            padding: 10px 0;
+            border-bottom: 1px solid #2d3748;
+            color: #d1d5db;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-card li:last-child {
+            border-bottom: none;
+        }
+
+        .icon {
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+        }
+
+        .color-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 32px 20px;
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .spinner {
+            border: 3px solid #2d3748;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #151a23;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2d3748;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b4252;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1>Emotion Recognition System</h1>
+                    <p class="subtitle">Real-time multi-model facial emotion analytics</p>
+                </div>
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span>LIVE</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="video-section">
+                <div class="video-header">
+                    <div class="video-title">Camera Feed</div>
+                    <div class="controls">
+                        <input type="text" id="person-name" placeholder="Enter name..." 
+                               style="padding: 8px; border-radius: 6px; border: 1px solid #3b4252; background: #0f1419; color: #e4e6eb;">
+                        <button class="btn btn-primary" onclick="setPersonName()">
+                            Set Name
+                        </button>
+                        <button class="btn" onclick="toggleSave()">
+                            <span id="save-text">Save: ON</span>
+                        </button>
+                        <button class="btn" onclick="refreshStream()">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="video-container">
+                    <img id="video-stream" src="{{ url_for('video_feed') }}" alt="Video Stream" onerror="handleImageError()">
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="stats-card">
+                    <h2>Analytics</h2>
+                    <div class="stat-item">
+                        <div class="stat-label">Detected Faces</div>
+                        <div class="stat-value" id="face-count">0</div>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <h2>Detection Results</h2>
+                    <ul class="emotion-list" id="emotion-list">
+                        <li class="no-data">Initializing camera...</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3>Database</h3>
+                    <ul>
+                        <li><span class="icon"></span><a href="/database" style="color: #3b82f6; text-decoration: none;">View Database</a></li>
+                        <li><span class="icon"></span>Faces Saved: <span id="db-count">0</span></li>
+                        <li><span class="icon"></span>Current: <span id="current-name">Unknown</span></li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3>Active Models</h3>
+                    <ul>
+                        <li><span class="icon"></span>FER2013</li>
+                        <li><span class="icon"></span>FER+ (Microsoft)</li>
+                        <li><span class="icon"></span>AffectNet</li>
+                        <li><span class="icon"></span>RAF-DB</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3>Emotion Indicators</h3>
+                    <ul>
+                        <li><span class="color-indicator" style="background: #10b981;"></span>Happy</li>
+                        <li><span class="color-indicator" style="background: #3b82f6;"></span>Sad</li>
+                        <li><span class="color-indicator" style="background: #ef4444;"></span>Angry</li>
+                        <li><span class="color-indicator" style="background: #f59e0b;"></span>Surprise</li>
+                        <li><span class="color-indicator" style="background: #8b5cf6;"></span>Fear</li>
+                        <li><span class="color-indicator" style="background: #06b6d4;"></span>Disgust</li>
+                        <li><span class="color-indicator" style="background: #6b7280;"></span>Neutral</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let statsUpdateInterval;
+        let isStreamActive = false;
+
+        // Handle image loading errors
+        function handleImageError() {
+            console.error('Failed to load video stream');
+            const emotionList = document.getElementById('emotion-list');
+            emotionList.innerHTML = '<li class="no-data"><div class="spinner"></div>Connecting to camera...</li>';
+        }
+
+        // Update statistics every 300ms for smooth updates
+        function updateStats() {
+            fetch('/stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (!isStreamActive) isStreamActive = true;
+                    
+                    // Update face count
+                    document.getElementById('face-count').textContent = data.face_count;
+
+                    // Update emotion list
+                    const emotionList = document.getElementById('emotion-list');
+                    
+                    if (data.emotions.length === 0) {
+                        emotionList.innerHTML = '<li class="no-data">No faces detected</li>';
+                    } else {
+                        emotionList.innerHTML = data.emotions.map((item, index) => `
+                            <li class="emotion-item">
+                                <span class="emotion-name">Subject ${index + 1}: ${item.emotion}</span>
+                                <span class="emotion-confidence">${Math.round(item.confidence)}%</span>
+                            </li>
+                        `).join('');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching stats:', error);
+                    if (isStreamActive) {
+                        const emotionList = document.getElementById('emotion-list');
+                        emotionList.innerHTML = '<li class="no-data">Connection interrupted</li>';
+                    }
+                });
+        }
+
+        // Set person name for detection
+        function setPersonName() {
+            const name = document.getElementById('person-name').value.trim();
+            if (!name) {
+                alert('Please enter a name');
+                return;
+            }
+            
+            fetch('/set_name', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: name })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('current-name').textContent = data.name;
+                alert(`Name set to: ${data.name}`);
+            })
+            .catch(error => console.error('Error setting name:', error));
+        }
+
+        // Toggle save mode
+        function toggleSave() {
+            fetch('/toggle_save')
+                .then(response => response.json())
+                .then(data => {
+                    const status = data.save_enabled ? 'ON' : 'OFF';
+                    document.getElementById('save-text').textContent = `Save: ${status}`;
+                })
+                .catch(error => console.error('Error toggling save:', error));
+        }
+
+        // Update database count
+        function updateDbCount() {
+            fetch('/api/statistics')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('db-count').textContent = data.total_faces;
+                })
+                .catch(error => console.error('Error fetching db count:', error));
+        }
+
+        // Refresh video stream
+        function refreshStream() {
+            const videoStream = document.getElementById('video-stream');
+            const src = videoStream.src;
+            videoStream.src = '';
+            
+            // Show loading state
+            const emotionList = document.getElementById('emotion-list');
+            emotionList.innerHTML = '<li class="no-data"><div class="spinner"></div>Refreshing stream...</li>';
+            
+            setTimeout(() => {
+                videoStream.src = src + '?t=' + new Date().getTime();
+                isStreamActive = false;
+            }, 500);
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            // Start updating stats with faster interval
+            statsUpdateInterval = setInterval(updateStats, 300);
+            updateStats();
+            updateDbCount();
+            setInterval(updateDbCount, 5000);
+            
+            // Monitor video stream
+            const videoStream = document.getElementById('video-stream');
+            videoStream.addEventListener('load', function() {
+                isStreamActive = true;
+            });
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (statsUpdateInterval) {
+                clearInterval(statsUpdateInterval);
+            }
+        });
+    </script>
+</body>
+</html>

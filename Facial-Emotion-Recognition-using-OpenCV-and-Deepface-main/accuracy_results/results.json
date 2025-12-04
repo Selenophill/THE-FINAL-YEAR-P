@@ -1,0 +1,19 @@
+{
+    "training_date": "December 2025",
+    "overall_metrics": {
+        "accuracy": 0.874,
+        "precision": 0.8818656009078425,
+        "recall": 0.874,
+        "f1_score": 0.8754879837931998
+    },
+    "test_samples": 500,
+    "emotions_detected": [
+        "angry",
+        "disgust",
+        "fear",
+        "happy",
+        "sad",
+        "surprise",
+        "neutral"
+    ]
+}

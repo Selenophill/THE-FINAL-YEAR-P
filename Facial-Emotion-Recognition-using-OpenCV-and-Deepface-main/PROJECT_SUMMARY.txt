@@ -1,0 +1,41 @@
+﻿# Facial Emotion Detection System - Project Summary
+
+## Overview
+Real-time facial emotion recognition system achieving 87.40% accuracy on test data.
+
+## Key Features
+- Multi-face detection with real-time emotion classification
+- Web-based interface for live monitoring
+- Database storage for detected faces
+- 7 emotion categories: Happy, Sad, Angry, Surprise, Fear, Disgust, Neutral
+
+## Technical Implementation
+- **Face Detection**: Haar Cascade Classifier
+- **Emotion Recognition**: Deep Learning Model (FER2013)
+- **Web Framework**: Flask
+- **Database**: SQLite
+- **Computer Vision**: OpenCV
+
+## Performance Metrics
+- Overall Accuracy: 87.40%
+- Test Samples: 500
+- Training completed: December 2025
+
+## Files Structure
+- app.py - Main web application
+- database.py - Database management
+- templates/ - Web interface
+- accuracy_results/ - Training results and metrics
+- detected_faces/ - Stored images
+
+## How to Run
+1. Install dependencies: pip install -r requirements.txt
+2. Start server: python app.py
+3. Open browser: http://127.0.0.1:5000
+
+## Training Results
+Comprehensive training metrics available in accuracy_results/ folder including:
+- Confusion matrix
+- Training curves
+- Per-emotion accuracy
+- Classification reports
