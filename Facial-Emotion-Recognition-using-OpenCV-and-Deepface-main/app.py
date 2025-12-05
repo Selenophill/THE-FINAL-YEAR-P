@@ -6,12 +6,13 @@ from collections import Counter
 import json
 from database import EmotionDatabase
 import os
+from mtcnn import MTCNN
 
 app = Flask(__name__)
 db = EmotionDatabase()
 
-# Load face cascade classifier
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+# Initialize MTCNN detector
+detector = MTCNN()
 
 # Trained emotion detection model
 USE_BEST_MODEL = 'Emotion'  # FER2013 model
@@ -23,7 +24,7 @@ current_stats = {
     'emotions': []
 }
 frame_skip = 0
-FRAME_SKIP_COUNT = 2  # Process every 3rd frame for speed
+FRAME_SKIP_COUNT = 1  # Process every 2nd frame for better accuracy
 save_detections = True  # Save detected faces to database
 current_person_name = "Unknown"  # Name for current detection session
 
@@ -89,20 +90,25 @@ def generate_frames():
                 detected_emotions = current_stats['emotions']
                 faces = []  # Don't process, just display
             else:
-                # Detect faces with stricter parameters to avoid false positives
-                faces = face_cascade.detectMultiScale(
-                    gray_frame, 
-                    scaleFactor=1.1,  # Increased for fewer false positives
-                    minNeighbors=8,   # More neighbors = stricter detection
-                    minSize=(80, 80), # Larger minimum size
-                    maxSize=(300, 300),
-                    flags=cv2.CASCADE_SCALE_IMAGE
-                )
-
+                # Detect faces using MTCNN
+                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                detections = detector.detect_faces(rgb_frame)
+                
                 face_count = 0
                 detected_emotions = []
             
-                for (x, y, w, h) in faces:
+                for detection in detections:
+                    # MTCNN returns confidence score - lower threshold for maximum detection
+                    if detection['confidence'] < 0.70:
+                        continue
+                    
+                    # Get bounding box
+                    x, y, w, h = detection['box']
+                    
+                    # Ensure coordinates are valid
+                    x, y = max(0, x), max(0, y)
+                    w, h = max(0, w), max(0, h)
+                    
                     # Add padding around face
                     padding = 10
                     x_pad = max(0, x - padding)
@@ -114,16 +120,13 @@ def generate_frames():
                     face_roi = frame[y_pad:y_pad + h_pad, x_pad:x_pad + w_pad]
                     gray_face = gray_frame[y:y + h, x:x + w]
                     
-                    # Validate if this is actually a face
-                    if not is_valid_face(gray_face, face_roi):
-                        continue
-                    
                     # Skip if face region is too small
                     if face_roi.shape[0] < 60 or face_roi.shape[1] < 60:
                         continue
                 
                     try:
-                        # Use single fast model for real-time performance
+                        # Use original face ROI without over-processing
+                        # Too much enhancement can distort emotion features
                         result = DeepFace.analyze(
                             face_roi, 
                             actions=['emotion'], 
@@ -134,16 +137,29 @@ def generate_frames():
                         
                         emotion = result[0]['dominant_emotion']
                         emotion_scores = result[0]['emotion']
-                        confidence = emotion_scores[emotion]
                         
-                        # Only accept high confidence detections
-                        if confidence < 40:
+                        # Get all emotions sorted by score
+                        sorted_emotions = sorted(emotion_scores.items(), key=lambda x: x[1], reverse=True)
+                        
+                        # Use the top emotion with highest score
+                        emotion = sorted_emotions[0][0]
+                        confidence = sorted_emotions[0][1]
+                        
+                        # Very low threshold to show all emotions
+                        if confidence < 5:
                             continue
                     
                         face_count += 1
+                        
+                        # Include all emotion scores for display
+                        all_emotions = {}
+                        for emo_name, emo_score in sorted_emotions:
+                            all_emotions[emo_name] = round(emo_score, 1)
+                        
                         detected_emotions.append({
                             'emotion': emotion,
-                            'confidence': round(confidence, 1)
+                            'confidence': round(confidence, 1),
+                            'all_scores': all_emotions
                         })
                         
                         # Save to database if enabled

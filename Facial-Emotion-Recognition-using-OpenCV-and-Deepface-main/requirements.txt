@@ -3,3 +3,5 @@ deepface
 tf_keras
 flask
 flask-cors
+mtcnn
+tensorflow

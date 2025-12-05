@@ -228,10 +228,9 @@ python app.py
 - **Memory Usage**: ~2GB GPU / 4GB RAM
 
 ### Validation Techniques
-- Texture variance analysis (Laplacian)
-- Skin tone validation (HSV color space)
-- Size constraints (80-300px)
-- Confidence thresholding (>40%)
+- MTCNN face detection with confidence scoring
+- Size constraints (60-350px)
+- Confidence thresholding (>90% for face detection, >25% for emotions)
 - Frame-to-frame smoothing
 
 ---

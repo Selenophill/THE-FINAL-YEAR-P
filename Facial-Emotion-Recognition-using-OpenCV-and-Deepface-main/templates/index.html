@@ -394,6 +394,13 @@
                     </ul>
                 </div>
 
+                <div class="stats-card">
+                    <h2>All Emotion Scores</h2>
+                    <div id="all-emotions-display" style="padding: 10px; font-size: 0.9em;">
+                        <div class="no-data">Waiting for detection...</div>
+                    </div>
+                </div>
+
                 <div class="info-card">
                     <h3>Database</h3>
                     <ul>
@@ -450,18 +457,43 @@
                     // Update face count
                     document.getElementById('face-count').textContent = data.face_count;
 
-                    // Update emotion list
+                    // Update emotion list with dominant emotion
                     const emotionList = document.getElementById('emotion-list');
+                    const allEmotionsDisplay = document.getElementById('all-emotions-display');
                     
                     if (data.emotions.length === 0) {
                         emotionList.innerHTML = '<li class="no-data">No faces detected</li>';
+                        if (allEmotionsDisplay) allEmotionsDisplay.innerHTML = '';
                     } else {
+                        // Show dominant emotion
                         emotionList.innerHTML = data.emotions.map((item, index) => `
                             <li class="emotion-item">
                                 <span class="emotion-name">Subject ${index + 1}: ${item.emotion}</span>
                                 <span class="emotion-confidence">${Math.round(item.confidence)}%</span>
                             </li>
                         `).join('');
+                        
+                        // Show all emotion scores for first detected face
+                        if (allEmotionsDisplay && data.emotions.length > 0 && data.emotions[0].all_scores) {
+                            const allScores = data.emotions[0].all_scores;
+                            const emotionEmojis = {
+                                'happy': '😊',
+                                'sad': '😢',
+                                'angry': '😠',
+                                'surprise': '😮',
+                                'fear': '😨',
+                                'disgust': '🤢',
+                                'neutral': '😐'
+                            };
+                            
+                            allEmotionsDisplay.innerHTML = Object.entries(allScores)
+                                .map(([emotion, score]) => `
+                                    <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #2d3748;">
+                                        <span>${emotionEmojis[emotion] || ''} ${emotion.charAt(0).toUpperCase() + emotion.slice(1)}</span>
+                                        <span style="color: #3b82f6; font-weight: 600;">${score}%</span>
+                                    </div>
+                                `).join('');
+                        }
                     }
                 })
                 .catch(error => {

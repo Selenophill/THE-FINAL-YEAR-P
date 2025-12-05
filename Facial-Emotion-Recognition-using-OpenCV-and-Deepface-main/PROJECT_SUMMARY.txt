@@ -10,7 +10,7 @@ Real-time facial emotion recognition system achieving 87.40% accuracy on test da
 - 7 emotion categories: Happy, Sad, Angry, Surprise, Fear, Disgust, Neutral
 
 ## Technical Implementation
-- **Face Detection**: Haar Cascade Classifier
+- **Face Detection**: MTCNN (Multi-task Cascaded Convolutional Networks)
 - **Emotion Recognition**: Deep Learning Model (FER2013)
 - **Web Framework**: Flask
 - **Database**: SQLite
