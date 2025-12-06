@@ -5,11 +5,12 @@ A real-time facial emotion detection system with web interface, multi-face detec
 ## Features
 
 - 🎯 Real-time multi-face emotion detection with MTCNN
+- 🤖 **Ensemble Model Approach**: Uses 4 emotion models (FER2013, FER+, AffectNet, RAF-DB) with majority voting
 - 🌐 Professional web interface with live video streaming
 - 💾 Database storage with automatic deduplication
 - 📊 High accuracy emotion classification (87.40%)
 - 🎨 Balanced detection for all 7 emotions: Happy, Sad, Angry, Surprise, Fear, Disgust, Neutral
-- 🧠 Intelligent emotion selection algorithm
+- 🧠 Intelligent emotion selection algorithm with score averaging
 - 📈 Comprehensive training results and accuracy metrics
 
 ## Technologies Used
@@ -44,12 +45,14 @@ A real-time facial emotion detection system with web interface, multi-face detec
 
 1. **Face Detection Pipeline:**
    - MTCNN (Multi-task Cascaded Convolutional Networks) for robust face detection
-   - 80% confidence threshold for optimal detection
+   - 70% confidence threshold for optimal detection
    - Histogram equalization for enhanced facial features
    - Handles multiple faces simultaneously
 
 2. **Emotion Classification:**
-   - DeepFace with FER2013 trained model for emotion recognition
+   - DeepFace with ensemble of 4 models: FER2013 (Emotion), FER+, AffectNet, RAF-DB
+   - Majority voting system for robust emotion prediction
+   - Score averaging across all models for confidence calculation
    - Intelligent emotion selection algorithm analyzing top 3 predictions
    - Adaptive confidence thresholds (12-20%) based on emotion type
    - Balanced detection preventing neutral/happy bias

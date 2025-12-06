@@ -14,8 +14,9 @@ db = EmotionDatabase()
 # Initialize MTCNN detector
 detector = MTCNN()
 
-# Trained emotion detection model
-USE_BEST_MODEL = 'Emotion'  # FER2013 model
+# Emotion detection models - using ensemble of multiple models
+EMOTION_MODELS = ['Emotion', 'FER+', 'AffectNet', 'RAF-DB']
+USE_ENSEMBLE = True  # Use all 4 models for higher accuracy
 
 # Global variables
 camera = None
@@ -125,25 +126,74 @@ def generate_frames():
                         continue
                 
                     try:
-                        # Use original face ROI without over-processing
-                        # Too much enhancement can distort emotion features
-                        result = DeepFace.analyze(
-                            face_roi, 
-                            actions=['emotion'], 
-                            enforce_detection=False,
-                            silent=True,
-                            detector_backend='skip'  # Skip face detection, we already did it
-                        )
-                        
-                        emotion = result[0]['dominant_emotion']
-                        emotion_scores = result[0]['emotion']
+                        # Ensemble prediction using all 4 models
+                        if USE_ENSEMBLE:
+                            all_model_predictions = []
+                            combined_scores = {}
+                            
+                            for model in EMOTION_MODELS:
+                                try:
+                                    result = DeepFace.analyze(
+                                        face_roi,
+                                        actions=['emotion'],
+                                        enforce_detection=False,
+                                        silent=True,
+                                        detector_backend='skip',
+                                        models={'emotion': model}
+                                    )
+                                    
+                                    emotion_pred = result[0]['dominant_emotion']
+                                    emotion_scores = result[0]['emotion']
+                                    
+                                    all_model_predictions.append(emotion_pred)
+                                    
+                                    # Accumulate scores from all models
+                                    for emo, score in emotion_scores.items():
+                                        if emo not in combined_scores:
+                                            combined_scores[emo] = []
+                                        combined_scores[emo].append(score)
+                                except Exception as model_error:
+                                    continue
+                            
+                            # Average scores across all models
+                            averaged_scores = {}
+                            for emo, scores in combined_scores.items():
+                                averaged_scores[emo] = sum(scores) / len(scores)
+                            
+                            # Get majority vote emotion or highest average score
+                            if len(all_model_predictions) > 0:
+                                # Count votes
+                                emotion_counter = Counter(all_model_predictions)
+                                most_common = emotion_counter.most_common(1)[0]
+                                
+                                # Use majority vote if clear winner, else use highest score
+                                if most_common[1] >= 2:  # At least 2 models agree
+                                    emotion = most_common[0]
+                                else:
+                                    # Use highest average score
+                                    sorted_emotions = sorted(averaged_scores.items(), key=lambda x: x[1], reverse=True)
+                                    emotion = sorted_emotions[0][0]
+                                
+                                confidence = averaged_scores[emotion]
+                                emotion_scores = averaged_scores
+                            else:
+                                continue
+                        else:
+                            # Single model prediction (fallback)
+                            result = DeepFace.analyze(
+                                face_roi, 
+                                actions=['emotion'], 
+                                enforce_detection=False,
+                                silent=True,
+                                detector_backend='skip'
+                            )
+                            
+                            emotion = result[0]['dominant_emotion']
+                            emotion_scores = result[0]['emotion']
+                            confidence = emotion_scores[emotion]
                         
                         # Get all emotions sorted by score
                         sorted_emotions = sorted(emotion_scores.items(), key=lambda x: x[1], reverse=True)
-                        
-                        # Use the top emotion with highest score
-                        emotion = sorted_emotions[0][0]
-                        confidence = sorted_emotions[0][1]
                         
                         # Very low threshold to show all emotions
                         if confidence < 5:

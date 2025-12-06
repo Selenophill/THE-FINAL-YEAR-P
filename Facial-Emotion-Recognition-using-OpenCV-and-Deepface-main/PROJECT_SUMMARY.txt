@@ -5,13 +5,15 @@ Real-time facial emotion recognition system achieving 87.40% accuracy on test da
 
 ## Key Features
 - Multi-face detection with real-time emotion classification
+- Ensemble approach using 4 emotion models with majority voting
 - Web-based interface for live monitoring
 - Database storage for detected faces
 - 7 emotion categories: Happy, Sad, Angry, Surprise, Fear, Disgust, Neutral
 
 ## Technical Implementation
 - **Face Detection**: MTCNN (Multi-task Cascaded Convolutional Networks)
-- **Emotion Recognition**: Deep Learning Model (FER2013)
+- **Emotion Recognition**: Ensemble of 4 models (FER2013, FER+, AffectNet, RAF-DB)
+- **Prediction Method**: Majority voting with score averaging
 - **Web Framework**: Flask
 - **Database**: SQLite
 - **Computer Vision**: OpenCV
