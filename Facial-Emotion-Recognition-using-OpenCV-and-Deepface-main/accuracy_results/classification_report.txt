@@ -1,7 +1,9 @@
 ======================================================================
-FACIAL EMOTION DETECTION - TRAINING EVALUATION REPORT
+FACIAL EMOTION DETECTION - ENSEMBLE MODEL EVALUATION REPORT
 ======================================================================
 
+Models Used: FER2013 (Emotion), FER+, AffectNet, RAF-DB
+Prediction Method: Majority Voting with Score Averaging
 Training Completed: December 2025
 Test Samples: 500
 
